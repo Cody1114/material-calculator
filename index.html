@@ -53,7 +53,7 @@ function resetM(){['gpm','gpy','paper','total'].forEach(x=>$(x).value='');$('rol
 function resetU(){ $('length').value='';$('weight').value='';$('loss').value='0';$('unitType').value='Meter';calcU()}
 function resetR(){['qty','packweight','rrolls','rpaper'].forEach(x=>$(x).value='');$('rloss').value='0';$('runit').value='Meter';calcR()}
 function copy(a,b){let s=$(a).textContent+'\n'+$(b).textContent;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(()=>alert('已複製 / Disalin')).catch(()=>prompt('Copy result',s));else prompt('Copy result',s)}
-document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',()=>{calcM();calcU();calcR()}));
+const recalc=()=>{calcM();calcU();calcR()};document.querySelectorAll('input').forEach(e=>e.addEventListener('input',recalc));document.querySelectorAll('select').forEach(e=>{e.addEventListener('input',recalc);e.addEventListener('change',recalc)});
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
 </script></body></html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173d32"><link rel="manifest" href="manifest.webmanifest"><title>Material Calculator</title>
+<style>
+:root{--bg:#f4f7f6;--dark:#173d32;--green:#188253;--text:#202824;--muted:#65716b;--border:#d7e0da}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Calibri,Arial,sans-serif}
+header{background:var(--dark);color:white;padding:15px}header h1{font-size:20px;margin:0 0 4px}header small{font-size:12px}
+main{max-width:760px;margin:auto;padding:12px}.tabs{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:12px}
+button, input,select{font:16px Calibri,Arial,sans-serif}.tab{padding:10px;border:1px solid var(--border);border-radius:9px;background:white;color:var(--dark);font-weight:bold}.tab.active{background:var(--dark);color:white}
+.panel{display:none;background:white;border:1px solid var(--border);border-radius:12px;padding:14px}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
+label{display:block;font-size:15px;font-weight:bold;margin-bottom:5px}label small{display:block;font-size:11px;font-weight:normal;color:var(--muted);margin-top:2px}
+input,select{width:100%;min-height:42px;padding:9px;border:1px solid #bdc9c1;border-radius:8px;background:white;color:var(--text)}
+.result{margin-top:14px;padding:13px;border:1px solid var(--border);border-radius:10px;background:#f7fbf8}.result h2{font-size:14px;margin:0 0 7px}.big{font-size:22px;font-weight:bold;color:var(--green);white-space:pre-line;overflow-wrap:anywhere}.sub{font-size:12px;color:var(--muted);margin-top:7px;white-space:pre-line;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;border:0;border-radius:8px;padding:11px;font-weight:bold}.primary{background:var(--dark);color:white}.secondary{background:#e7ece8}
+.note,footer{font-size:11px;color:var(--muted);text-align:center;margin:14px 2px}
+@media(min-width:600px){.tabs{grid-template-columns:repeat(3,1fr)}main{padding:18px}}@media(max-width:360px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head><body>
+<header><h1>Sistem Perhitungan Material Otomatis</h1><small>自動算料系統 · Offline Calculator</small></header><main>
+<nav class="tabs"><button class="tab active" data-tab="material">Kalkulasi Material<br><small>自動算料</small></button><button class="tab" data-tab="unit">Berat Tali Yard/Meter<br><small>材料單位克重</small></button><button class="tab" data-tab="retur">Retur<br><small>退料計算</small></button></nav>
+<section class="panel active" id="material"><div class="grid">
+<div><label>Berat per Meter (gram)<small>材料一米重量（克）</small></label><input id="gpm" type="number" min="0" step="any" placeholder="g/m"></div>
+<div><label>Berat per Yard (gram)<small>材料一碼重量（克）</small></label><input id="gpy" type="number" min="0" step="any" placeholder="g/yard"></div>
+<div><label>Jumlah roll dalam packingan<small>每個包裝內的卷數</small></label><input id="rolls" type="number" min="0" step="any" value="1"></div>
+<div><label>Berat Paper (g)<small>包裝紙重量（克）</small></label><input id="paper" type="number" min="0" step="any"></div>
+<div class="full"><label>Berat Total Material<small>材料總重</small></label><div style="display:flex;gap:8px"><input id="total" type="number" min="0" step="any" placeholder="總重量"><select id="totalunit" style="width:90px"><option>kg</option><option>g</option></select></div></div>
+<div><label>Desimal / 小數位數</label><select id="digits"><option>0</option><option selected>2</option><option>3</option><option>4</option></select></div></div>
+<div class="result"><h2>Hasil Perhitungan / 計算結果</h2><div class="sub" id="net">Berat bersih / 材料淨重: —</div><div class="big" id="out">請輸入資料以開始計算</div></div>
+<div class="actions"><button class="secondary" onclick="resetM()">Reset / 清除</button><button class="primary" onclick="copy('net','out')">Salin Hasil / 複製結果</button></div></section>
+<section class="panel" id="unit"><div class="grid">
+<div class="full"><label>Panjang Material (cm)<small>材料長度（cm）</small></label><input id="length" type="number" min="0" step="any"></div>
+<div><label>Berat Material (gram)<small>材料重量（克）</small></label><input id="weight" type="number" min="0" step="any"></div>
+<div><label>Loss (%)<small>損耗率（百分比）</small></label><input id="loss" type="number" min="0" step="any" value="0"></div>
+<div class="full"><label>Pilih Unit Berat<small>選擇單位克重</small></label><select id="unit"><option>Meter</option><option>Yard</option></select><small>Meter = 100 cm | Yard = 91.44 cm</small></div></div>
+<div class="result"><h2>Berat per Unit / 單位克重結果</h2><div class="big" id="uout">請輸入資料以開始計算</div><div class="sub" id="formula">Rumus / 計算公式: —</div></div>
+<div class="actions"><button class="secondary" onclick="resetU()">Reset / 清除</button><button class="primary" onclick="copy('uout','formula')">Salin Hasil / 複製結果</button></div></section>
+<section class="panel" id="retur"><div class="grid">
+<div><label>Jumlah per packing<small>包裝數量</small></label><input id="qty" type="number" min="0" step="any" placeholder="數量"><select id="runit" style="margin-top:6px"><option>Meter</option><option>Yard</option></select></div>
+<div><label>Berat per packing (g)<small>包裝重量（克）</small></label><input id="packweight" type="number" min="0" step="any"></div>
+<div><label>Jumlah roll dalam packingan<small>包裝內卷數</small></label><input id="rrolls" type="number" min="0" step="any"></div>
+<div><label>Berat Paper (g)<small>包裝材料重量（克）</small></label><input id="rpaper" type="number" min="0" step="any"></div>
+<div class="full"><label>Loss (%)<small>損耗率（輸入 5 代表 5%）</small></label><input id="rloss" type="number" min="0" step="any" value="0"></div></div>
+<div class="result"><h2>Hasil / 計算結果</h2><div class="big" id="rout">請輸入資料以開始計算</div><div class="sub" id="rformula">Rumus / 計算公式: —</div></div>
+<div class="actions"><button class="secondary" onclick="resetR()">Reset / 清除</button><button class="primary" onclick="copy('rout','rformula')">Salin Hasil / 複製結果</button></div></section>
+<p class="note">資料只在此裝置計算，不會上傳到網站。首次在線開啟並快取後，可離線使用。<br>Perhitungan dilakukan di perangkat, tidak dikirim ke server.</p></main><footer>Material Calculator · Offline-ready PWA</footer>
+<script>
+const $=id=>document.getElementById(id), n=id=>{let s=$(id).value.trim();return s===''?null:Number(s)}, f=(v,d=2)=>Number(v).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+function calcM(){let a=n('gpm'),b=n('gpy'),r=n('rolls'),p=n('paper'),t=n('total'),d=+$('digits').value;if([r,p,t].some(v=>v===null)){$('net').textContent='Berat bersih / 材料淨重: —';$('out').textContent='請輸入資料以開始計算';return}let net=( $('totalunit').value==='kg'?t*1000:t)-r*p;if(net<0){$('net').textContent='淨重為負數，請檢查輸入';$('out').textContent='Data tidak valid / 資料錯誤';return}$('net').textContent='Berat bersih / 材料淨重: '+f(net,d)+' g';let o=[];if(a>0)o.push(f(net/a,d)+' m');if(b>0)o.push(f(net/b,d)+' yd');$('out').textContent=o.join('\n')||'請輸入每米或每碼重量'}
+function calcU(){let l=n('length'),w=n('weight'),loss=n('loss');if([l,w,loss].some(v=>v===null)){$('uout').textContent='請輸入資料以開始計算';$('formula').textContent='Rumus / 計算公式: —';return}if(l<=0){$('uout').textContent='材料長度必須大於 0';return}let ul=$('unit').value==='Meter'?100:91.44,un=ul===100?'g/m':'g/yard',v=ul*(1+loss/100)*w/l;$('uout').textContent=f(v)+' '+un;$('formula').textContent=`(${ul} × (1 + ${loss}%) × ${w}) / ${l} = ${f(v)} ${un}`}
+function calcR(){let q=n('qty'),p=n('packweight'),r=n('rrolls'),paper=n('rpaper'),loss=n('rloss');if([q,p,r,paper,loss].some(v=>v===null)){$('rout').textContent='請輸入資料以開始計算';$('rformula').textContent='Rumus / 計算公式: —';return}if(q<=0){$('rout').textContent='包裝數量必須大於 0';return}let net=p-r*paper;if(net<0){$('rout').textContent='淨重為負數，請檢查輸入';return}let v=net/q*(1+loss/100),un=$('runit').value==='Meter'?'g/m':'g/yard';$('rout').textContent=f(v)+' '+un+'\n材料單位重量 / Berat per unit';$('rformula').textContent=`((${p} − ${r} × ${paper}) / ${q}) × (1 + ${loss}%) = ${f(v)} ${un}`}
+function resetM(){['gpm','gpy','paper','total'].forEach(x=>$(x).value='');$('rolls').value='1';$('totalunit').value='kg';$('digits').value='2';calcM()}
+function resetU(){ $('length').value='';$('weight').value='';$('loss').value='0';$('unit').value='Meter';calcU()}
+function resetR(){['qty','packweight','rrolls','rpaper'].forEach(x=>$(x).value='');$('rloss').value='0';$('runit').value='Meter';calcR()}
+function copy(a,b){let s=$(a).textContent+'\n'+$(b).textContent;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(()=>alert('已複製 / Disalin')).catch(()=>prompt('Copy result',s));else prompt('Copy result',s)}
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',()=>{calcM();calcU();calcR()}));
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
+</script></body></html>
